@@ -3,10 +3,12 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
-const connectDB = require('./config/db');
+const connectDB          = require('./config/db');
+const corsOptions        = require('./config/corsConfig');
 const { generalLimiter } = require('./config/rateLimit');
-const errorMiddleware = require('./middlewares/errorMiddleware');
-const loggerMiddleware = require('./middlewares/loggerMiddleware');
+const errorMiddleware    = require('./middlewares/errorMiddleware');
+const loggerMiddleware   = require('./middlewares/loggerMiddleware');
+const notFoundMiddleware = require('./middlewares/notFoundMiddleware');
 
 // Route imports
 const authRoutes     = require('./routes/authRoutes');
@@ -20,10 +22,7 @@ const PORT = process.env.PORT || 5000;
 
 // ─── Security & Parsing Middlewares ───────────────────────────────────────────
 app.use(helmet());
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? false : '*',
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -64,14 +63,8 @@ app.use('/api/v1/stats',     statsRoutes);
 app.use('/api/v1/admin',     adminRoutes);
 app.use('/api/v1/users',     userRoutes);
 
-// ─── 404 Handler ──────────────────────────────────────────────────────────────
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`,
-    timestamp: new Date().toISOString(),
-  });
-});
+// ─── 404 Handler ────────────────────────────────────────────────────────────────
+app.use('*', notFoundMiddleware);
 
 // ─── Global Error Middleware ───────────────────────────────────────────────────
 app.use(errorMiddleware);
