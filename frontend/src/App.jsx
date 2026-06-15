@@ -8,32 +8,21 @@ import { fetchCurrentUser } from './store/authSlice'
 import PrivateRoute from './components/common/PrivateRoute'
 import AdminRoute from './components/common/AdminRoute'
 
-// ─── Lazy Loaded Pages ────────────────────────────────────────────────────────
+// ─── Lazy Loaded Pages (flat pages/ folder) ───────────────────────────────────
 
-// Auth
-const Login    = lazy(() => import('./pages/auth/Login'))
-const Register = lazy(() => import('./pages/auth/Register'))
-
-// Dashboards
-const AdminDashboard = lazy(() => import('./pages/dashboard/AdminDashboard'))
-const UserDashboard  = lazy(() => import('./pages/dashboard/UserDashboard'))
-
-// Conflicts
-const ConflictList    = lazy(() => import('./pages/conflicts/ConflictList'))
-const ConflictDetail  = lazy(() => import('./pages/conflicts/ConflictDetail'))
-const ConflictCompare = lazy(() => import('./pages/conflicts/ConflictCompare'))
-
-// Analytics
-const Analytics = lazy(() => import('./pages/analytics/Analytics'))
-
-// Admin
-const AdminConflicts = lazy(() => import('./pages/admin/AdminConflicts'))
-const AdminUsers     = lazy(() => import('./pages/admin/AdminUsers'))
-
-// User
-const Profile  = lazy(() => import('./pages/Profile'))
-const Settings = lazy(() => import('./pages/Settings'))
-const NotFound = lazy(() => import('./pages/NotFound'))
+const Login           = lazy(() => import('./pages/Login'))
+const Register        = lazy(() => import('./pages/Register'))
+const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'))
+const UserDashboard   = lazy(() => import('./pages/UserDashboard'))
+const ConflictList    = lazy(() => import('./pages/ConflictList'))
+const ConflictDetail  = lazy(() => import('./pages/ConflictDetail'))
+const ConflictCompare = lazy(() => import('./pages/ConflictCompare'))
+const Analytics       = lazy(() => import('./pages/Analytics'))
+const AdminConflicts  = lazy(() => import('./pages/AdminConflicts'))
+const AdminUsers      = lazy(() => import('./pages/AdminUsers'))
+const Profile         = lazy(() => import('./pages/Profile'))
+const Settings        = lazy(() => import('./pages/Settings'))
+const NotFound        = lazy(() => import('./pages/NotFound'))
 
 // ─── Skeleton Fallback ────────────────────────────────────────────────────────
 
@@ -96,64 +85,18 @@ function AppInner() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           {/* ── Protected: any authenticated user ── */}
-          <Route
-            path="/dashboard"
-            element={<PrivateRoute><UserDashboard /></PrivateRoute>}
-          />
-          <Route
-            path="/conflicts"
-            element={<PrivateRoute><ConflictList /></PrivateRoute>}
-          />
-          <Route
-            path="/conflicts/compare"
-            element={<PrivateRoute><ConflictCompare /></PrivateRoute>}
-          />
-          <Route
-            path="/conflicts/:id"
-            element={<PrivateRoute><ConflictDetail /></PrivateRoute>}
-          />
-          <Route
-            path="/analytics"
-            element={<PrivateRoute><Analytics /></PrivateRoute>}
-          />
-          <Route
-            path="/profile"
-            element={<PrivateRoute><Profile /></PrivateRoute>}
-          />
+          <Route path="/dashboard"          element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
+          <Route path="/conflicts"          element={<PrivateRoute><ConflictList /></PrivateRoute>} />
+          <Route path="/conflicts/compare"  element={<PrivateRoute><ConflictCompare /></PrivateRoute>} />
+          <Route path="/conflicts/:id"      element={<PrivateRoute><ConflictDetail /></PrivateRoute>} />
+          <Route path="/analytics"          element={<PrivateRoute><Analytics /></PrivateRoute>} />
+          <Route path="/profile"            element={<PrivateRoute><Profile /></PrivateRoute>} />
 
           {/* ── Admin-only Routes ── */}
-          <Route
-            path="/admin/dashboard"
-            element={
-              <PrivateRoute>
-                <AdminRoute><AdminDashboard /></AdminRoute>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin/conflicts"
-            element={
-              <PrivateRoute>
-                <AdminRoute><AdminConflicts /></AdminRoute>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <PrivateRoute>
-                <AdminRoute><AdminUsers /></AdminRoute>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <PrivateRoute>
-                <AdminRoute><Settings /></AdminRoute>
-              </PrivateRoute>
-            }
-          />
+          <Route path="/admin/dashboard" element={<PrivateRoute><AdminRoute><AdminDashboard /></AdminRoute></PrivateRoute>} />
+          <Route path="/admin/conflicts"  element={<PrivateRoute><AdminRoute><AdminConflicts /></AdminRoute></PrivateRoute>} />
+          <Route path="/admin/users"      element={<PrivateRoute><AdminRoute><AdminUsers /></AdminRoute></PrivateRoute>} />
+          <Route path="/settings"         element={<PrivateRoute><AdminRoute><Settings /></AdminRoute></PrivateRoute>} />
 
           {/* ── 404 ── */}
           <Route path="*" element={<NotFound />} />
@@ -173,19 +116,15 @@ function AppInner() {
             fontFamily: "'Inter', sans-serif",
             fontSize: '13px',
           },
-          success: {
-            iconTheme: { primary: '#23D18B', secondary: '#161B22' },
-          },
-          error: {
-            iconTheme: { primary: '#FF4B4B', secondary: '#161B22' },
-          },
+          success: { iconTheme: { primary: '#23D18B', secondary: '#161B22' } },
+          error:   { iconTheme: { primary: '#FF4B4B', secondary: '#161B22' } },
         }}
       />
     </BrowserRouter>
   )
 }
 
-// ─── Root App — wraps with Redux + HelmetProvider ─────────────────────────────
+// ─── Root App ─────────────────────────────────────────────────────────────────
 
 export default function App() {
   return (
