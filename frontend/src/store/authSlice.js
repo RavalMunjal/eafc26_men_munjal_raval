@@ -8,10 +8,11 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const { authService } = await import('../services/authService')
-      const data = await authService.login(credentials)
-      localStorage.setItem(TOKEN_KEY, data.token)
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user))
-      return data
+      const res = await authService.login(credentials)
+      const { token, user } = res.data || res
+      localStorage.setItem(TOKEN_KEY, token)
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+      return { token, user }
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Login failed')
     }
@@ -23,10 +24,11 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const { authService } = await import('../services/authService')
-      const data = await authService.register(userData)
-      localStorage.setItem(TOKEN_KEY, data.token)
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user))
-      return data
+      const res = await authService.register(userData)
+      const { token, user } = res.data || res
+      localStorage.setItem(TOKEN_KEY, token)
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+      return { token, user }
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Registration failed')
     }
@@ -53,8 +55,8 @@ export const fetchCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const { authService } = await import('../services/authService')
-      const data = await authService.getMe()
-      return data
+      const res = await authService.getMe()
+      return res.data?.user || res.data || res
     } catch (err) {
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(USER_KEY)
