@@ -2,23 +2,24 @@ import { useFormik } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { registerUser, clearAuthError } from '../../store/authSlice'
-import { registerSchema } from '../../utils/validators'
+import { loginUser, clearAuthError } from '../store/authSlice'
+import { loginSchema } from '../utils/validators'
 
-export default function Register() {
+export default function Login() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { loading, error, isAuthenticated, user } = useSelector((s) => s.auth)
-  const [showSecret, setShowSecret] = useState(false)
 
+  // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated && user) {
       navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard', { replace: true })
     }
   }, [isAuthenticated, user, navigate])
 
+  // Show Redux error as toast
   useEffect(() => {
     if (error) {
       toast.error(error)
@@ -27,16 +28,12 @@ export default function Register() {
   }, [error, dispatch])
 
   const formik = useFormik({
-    initialValues: { name: '', email: '', password: '', secretKey: '' },
-    validationSchema: registerSchema,
+    initialValues: { email: '', password: '' },
+    validationSchema: loginSchema,
     onSubmit: async (values) => {
-      // Strip empty secretKey
-      const payload = { ...values }
-      if (!payload.secretKey) delete payload.secretKey
-
-      const result = await dispatch(registerUser(payload))
-      if (registerUser.fulfilled.match(result)) {
-        toast.success('Account created! Welcome to ConflictLens 🎯')
+      const result = await dispatch(loginUser(values))
+      if (loginUser.fulfilled.match(result)) {
+        toast.success('Welcome back! 🎯')
         const role = result.payload?.user?.role
         navigate(role === 'admin' ? '/admin/dashboard' : '/dashboard', { replace: true })
       }
@@ -46,11 +43,12 @@ export default function Register() {
   return (
     <>
       <Helmet>
-        <title>ConflictLens — Register</title>
-        <meta name="description" content="Create your ConflictLens account to access War Economic Impact Analytics" />
+        <title>ConflictLens — Login</title>
+        <meta name="description" content="Login to ConflictLens War Economic Impact Analytics Dashboard" />
       </Helmet>
 
       <div style={styles.page}>
+        {/* Background grid pattern */}
         <div style={styles.gridBg} />
 
         <div style={styles.card}>
@@ -59,36 +57,16 @@ export default function Register() {
             <span style={styles.logoIcon}>⊕</span>
             <span style={styles.logoText}>ConflictLens</span>
           </div>
+
           <p style={styles.subtitle}>War Economic Impact Analytics</p>
-          <h1 style={styles.heading}>Create Account</h1>
+          <h1 style={styles.heading}>Sign In</h1>
 
           <form onSubmit={formik.handleSubmit} style={styles.form} noValidate>
-            {/* Name */}
-            <div style={styles.field}>
-              <label style={styles.label}>FULL NAME</label>
-              <input
-                id="name"
-                type="text"
-                name="name"
-                placeholder="John Analyst"
-                value={formik.values.name}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                style={{
-                  ...styles.input,
-                  ...(formik.touched.name && formik.errors.name ? styles.inputError : {}),
-                }}
-              />
-              {formik.touched.name && formik.errors.name && (
-                <span style={styles.errorMsg}>{formik.errors.name}</span>
-              )}
-            </div>
-
             {/* Email */}
             <div style={styles.field}>
               <label style={styles.label}>EMAIL ADDRESS</label>
               <input
-                id="register-email"
+                id="email"
                 type="email"
                 name="email"
                 placeholder="analyst@conflictlens.io"
@@ -110,10 +88,10 @@ export default function Register() {
             <div style={styles.field}>
               <label style={styles.label}>PASSWORD</label>
               <input
-                id="register-password"
+                id="password"
                 type="password"
                 name="password"
-                placeholder="Min 6 characters"
+                placeholder="••••••••"
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -121,96 +99,50 @@ export default function Register() {
                   ...styles.input,
                   ...(formik.touched.password && formik.errors.password ? styles.inputError : {}),
                 }}
-                autoComplete="new-password"
+                autoComplete="current-password"
               />
               {formik.touched.password && formik.errors.password && (
                 <span style={styles.errorMsg}>{formik.errors.password}</span>
               )}
             </div>
 
-            {/* Admin Secret Key (collapsible) */}
-            <div style={styles.secretToggleWrap}>
-              <button
-                type="button"
-                id="toggle-secret"
-                onClick={() => setShowSecret((p) => !p)}
-                style={styles.secretToggle}
-              >
-                {showSecret ? '▾' : '▸'} Admin Secret Key{' '}
-                <span style={styles.optional}>(optional)</span>
-              </button>
-            </div>
-            {showSecret && (
-              <div style={{ ...styles.field, marginTop: '-8px' }}>
-                <input
-                  id="secretKey"
-                  type="password"
-                  name="secretKey"
-                  placeholder="Enter admin secret key"
-                  value={formik.values.secretKey}
-                  onChange={formik.handleChange}
-                  style={styles.input}
-                />
-              </div>
-            )}
-
             {/* Submit */}
             <button
-              id="register-submit"
+              id="login-submit"
               type="submit"
               disabled={loading || !formik.isValid}
               style={{
                 ...styles.btn,
-                ...(loading || !formik.isValid ? styles.btnDisabled : {}),
+                ...(loading ? styles.btnDisabled : {}),
               }}
             >
-              {loading ? '⟳ Creating Account...' : '→ Create Account'}
+              {loading ? (
+                <span style={styles.spinner}>⟳ Authenticating...</span>
+              ) : (
+                '→ Access Dashboard'
+              )}
             </button>
           </form>
 
           <p style={styles.switchText}>
-            Already registered?{' '}
-            <Link to="/login" style={styles.link}>
-              Sign in here
+            No account?{' '}
+            <Link to="/register" style={styles.link}>
+              Register here
             </Link>
           </p>
 
-          {/* Strength indicator */}
-          {formik.values.password && (
-            <div style={styles.strengthWrap}>
-              <div
-                style={{
-                  ...styles.strengthBar,
-                  width:
-                    formik.values.password.length >= 12
-                      ? '100%'
-                      : formik.values.password.length >= 8
-                      ? '66%'
-                      : '33%',
-                  background:
-                    formik.values.password.length >= 12
-                      ? '#23D18B'
-                      : formik.values.password.length >= 8
-                      ? '#F0A500'
-                      : '#FF4B4B',
-                }}
-              />
-              <span style={styles.strengthLabel}>
-                {formik.values.password.length >= 12
-                  ? 'Strong'
-                  : formik.values.password.length >= 8
-                  ? 'Medium'
-                  : 'Weak'}
-              </span>
-            </div>
-          )}
+          {/* Divider + demo hint */}
+          <div style={styles.divider} />
+          <p style={styles.hint}>
+            🔐 Admin? Add your <code style={styles.code}>secretKey</code> on the register page.
+          </p>
         </div>
       </div>
     </>
   )
 }
 
-// ─── Inline Styles ───────────────────────────────────────────────────────────
+// ─── Inline Styles (military dark) ───────────────────────────────────────────
 
 const styles = {
   page: {
@@ -281,7 +213,7 @@ const styles = {
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '18px',
+    gap: '20px',
   },
   field: {
     display: 'flex',
@@ -305,8 +237,6 @@ const styles = {
     outline: 'none',
     transition: 'border-color 0.2s',
     fontFamily: "'Inter', sans-serif",
-    width: '100%',
-    boxSizing: 'border-box',
   },
   inputError: {
     borderColor: '#FF4B4B',
@@ -315,27 +245,8 @@ const styles = {
     color: '#FF4B4B',
     fontSize: '12px',
   },
-  secretToggleWrap: {
-    marginTop: '-6px',
-  },
-  secretToggle: {
-    background: 'none',
-    border: 'none',
-    color: '#8B949E',
-    fontSize: '13px',
-    cursor: 'pointer',
-    padding: 0,
-    fontFamily: "'Inter', sans-serif",
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-  },
-  optional: {
-    color: '#30363D',
-    fontSize: '11px',
-  },
   btn: {
-    marginTop: '4px',
+    marginTop: '8px',
     background: 'linear-gradient(135deg, #E85D26, #F0A500)',
     color: '#fff',
     border: 'none',
@@ -345,12 +256,16 @@ const styles = {
     fontWeight: 600,
     cursor: 'pointer',
     letterSpacing: '0.02em',
-    transition: 'opacity 0.2s',
+    transition: 'opacity 0.2s, transform 0.1s',
     fontFamily: "'Inter', sans-serif",
   },
   btnDisabled: {
     opacity: 0.6,
     cursor: 'not-allowed',
+  },
+  spinner: {
+    display: 'inline-block',
+    animation: 'spin 1s linear infinite',
   },
   switchText: {
     textAlign: 'center',
@@ -363,22 +278,22 @@ const styles = {
     textDecoration: 'none',
     fontWeight: 500,
   },
-  strengthWrap: {
-    marginTop: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
+  divider: {
+    height: '1px',
+    background: '#30363D',
+    margin: '20px 0',
   },
-  strengthBar: {
-    height: '4px',
-    borderRadius: '2px',
-    transition: 'width 0.3s, background 0.3s',
-    flex: 1,
-    maxWidth: '200px',
-    background: '#FF4B4B',
-  },
-  strengthLabel: {
-    fontSize: '11px',
+  hint: {
+    textAlign: 'center',
     color: '#8B949E',
+    fontSize: '12px',
+    margin: 0,
+  },
+  code: {
+    background: '#0D1117',
+    color: '#F0A500',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '11px',
   },
 }
