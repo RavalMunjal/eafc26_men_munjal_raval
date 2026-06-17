@@ -4,8 +4,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { loginUser, clearAuthError } from '../../store/authSlice'
-import { loginSchema } from '../../utils/validators'
+import { loginUser, clearAuthError } from '../store/authSlice'
+import { loginSchema } from '../utils/validators'
 
 export default function Login() {
   const dispatch = useDispatch()

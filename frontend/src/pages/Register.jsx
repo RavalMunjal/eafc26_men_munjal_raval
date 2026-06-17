@@ -4,8 +4,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { registerUser, clearAuthError } from '../../store/authSlice'
-import { registerSchema } from '../../utils/validators'
+import { registerUser, clearAuthError } from '../store/authSlice'
+import { registerSchema } from '../utils/validators'
 
 export default function Register() {
   const dispatch = useDispatch()
