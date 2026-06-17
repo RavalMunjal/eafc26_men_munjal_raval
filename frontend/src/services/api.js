@@ -5,7 +5,7 @@ import { TOKEN_KEY } from '../utils/constants'
 // ─── Axios Instance ──────────────────────────────────────────────────────────
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
+  baseURL: 'https://eafc26-men-munjal-raval.onrender.com/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

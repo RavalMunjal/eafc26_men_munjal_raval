@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { loginUser, clearAuthError } from '../store/authSlice'
+import { loginUser, clearAuthError, registerUser } from '../store/authSlice'
 import { loginSchema } from '../utils/validators'
 
 export default function Login() {
@@ -39,6 +39,26 @@ export default function Login() {
       }
     },
   })
+
+  const handleDemoLogin = async () => {
+    toast.loading('Accessing Demo Account...', { id: 'demo' })
+    const creds = { email: 'demo@conflictlens.io', password: 'password123' }
+    formik.setValues(creds)
+    
+    let result = await dispatch(loginUser(creds))
+    if (result.type.includes('rejected')) {
+      toast.loading('Creating demo account...', { id: 'demo' })
+      result = await dispatch(registerUser({ name: 'Demo Analyst', ...creds }))
+    }
+
+    if (result.type.includes('fulfilled')) {
+      toast.success('Demo Login successful! 🎯', { id: 'demo' })
+      const role = result.payload?.user?.role || 'user'
+      navigate(role === 'admin' ? '/admin/dashboard' : '/dashboard', { replace: true })
+    } else {
+      toast.error('Demo login failed. Check connection.', { id: 'demo' })
+    }
+  }
 
   return (
     <>
@@ -121,6 +141,20 @@ export default function Login() {
               ) : (
                 '→ Access Dashboard'
               )}
+            </button>
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={loading}
+              style={{
+                ...styles.btn,
+                background: 'rgba(77,159,255,0.1)',
+                color: '#4D9FFF',
+                border: '1px solid rgba(77,159,255,0.3)',
+                marginTop: '0px'
+              }}
+            >
+              🚀 One-Click Demo Login
             </button>
           </form>
 
